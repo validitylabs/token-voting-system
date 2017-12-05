@@ -1,0 +1,60 @@
+{
+  "name": "token-voting-system",
+  "version": "1.0.0",
+  "description": "Vote on Proposals with Tokens",
+  "author": "Roland Kofler <roland.kofler@validitylabs.org>",
+  "homepage": "https://github.com/validitylabs/token-voting-system",
+  "main": "./dist/app.js",
+  "private": true,
+  "license": "UNLICENSED",
+  "engines": {
+    "node": "^8.0.x"
+  },
+  "scripts": {
+    "postinstall": "tools/hashChecker.js",
+    "start": "yarn run develop",
+    "compile": "truffle compile --all",
+    "migrate-dev": "truffle migrate --reset --compile-all --network _development",
+    "test": "yarn run test-dev",
+    "test-dev": "truffle test --network _development",
+    "migrate-ropsten": "truffle migrate --reset --compile-all --network ropsten",
+    "test-ropsten": "truffle test --compile-all --network ropsten",
+    "coverage": "solidity-coverage",
+    "dev": "truffle develop",
+    "testrpc": "truffle develop --log --gasPrice 0x02 --gasLimit 0x100000 --mnemonic 'waste system voyage dentist fine donate purpose truly cactus chest coyote globe' --account=\"0x2bdd21761a483f71054e14f5b827213567971c676928d9a1808cbfa4b7501200,1000000000000000000000000\" --account=\"0x2bdd21761a483f71054e14f5b827213567971c676928d9a1808cbfa4b7501201,1000000000000000000000000\" --account=\"0x2bdd21761a483f71054e14f5b827213567971c676928d9a1808cbfa4b7501202,1000000000000000000000000\" --account=\"0x2bdd21761a483f71054e14f5b827213567971c676928d9a1808cbfa4b7501203,1000000000000000000000000\" --account=\"0x2bdd21761a483f71054e14f5b827213567971c676928d9a1808cbfa4b7501204,1000000000000000000000000\" --account=\"0x2bdd21761a483f71054e14f5b827213567971c676928d9a1808cbfa4b7501205,1000000000000000000000000\" --account=\"0x2bdd21761a483f71054e14f5b827213567971c676928d9a1808cbfa4b7501206,1000000000000000000000000\" --account=\"0x2bdd21761a483f71054e14f5b827213567971c676928d9a1808cbfa4b7501207,1000000000000000000000000\" --account=\"0x2bdd21761a483f71054e14f5b827213567971c676928d9a1808cbfa4b7501208,1000000000000000000000000\" --account=\"0x2bdd21761a483f71054e14f5b827213567971c676928d9a1808cbfa4b7501209,1000000000000000000000000\"",
+    "debug": "truffle debug",
+    "jsdoc": "jsdoc -c jsdoc.cnf.json",
+    "clean": "shx rm -fr dist build bin coverage coverage.json",
+    "reset": "npm run clean; shx rm -fr  node_modules",
+    "upgrade": "yarn run reset; yarn upgrade"
+  },
+  "dependencies": {
+    "moment": "^2.19.1",
+    "truffle-contract": "^3.0.1",
+    "web3": "^1.0.0-beta.24",
+    "zeppelin-solidity": "^1.3.0"
+  },
+  "devDependencies": {
+    "babel-eslint": "^8.0.1",
+    "babel-polyfill": "^6.26.0",
+    "babel-preset-env": "^1.6.1",
+    "babel-register": "^6.26.0",
+    "chai": "^4.1.2",
+    "chai-as-promised": "^7.1.1",
+    "chai-bignumber": "^2.0.2",
+    "colors": "^1.1.2",
+    "eslint": "^4.12.1",
+    "eslint-config-xo": "^0.19.0",
+    "eslint-plugin-babel": "^4.1.2",
+    "ganache-core": "^2.0.0",
+    "jsdoc": "^3.5.5",
+    "shelljs": "^0.7.8",
+    "shx": "^0.2.2",
+    "solc": "0.4.18",
+    "solidity-coverage": "git://github.com/validitylabs/solidity-coverage.git",
+    "truffle": "^4.0.1"
+  },
+  "optionalDevDependencies": {
+    "fsevents": "*"
+  }
+}

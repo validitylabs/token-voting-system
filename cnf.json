@@ -1,0 +1,38 @@
+{
+    "comment startTime":            "27/01/2018 @ 12:00am (CET)",
+    "startTime":                    1517050800,
+    "comment endTime":              "03/02/2018 @ 12:00am (CET)",
+    "endTime":                      1517655600,
+    "comment cap":                  "Will be calculated to 95000000 * 10**18 in migration script",
+    "cap":                          95000000,
+    "comment confirmationPeriod":   "confirmation period in days",
+    "confirmationPeriod":           30,
+    "comment rateTokenPerChf":      "ratio tokens per CHF",
+    "rateTokenPerChf":              1,
+    "comment rateWeiPerChf":        "ratio wei per CHF",
+    "rateWeiPerChf":                3e15,
+    "networks": {
+        "_development": {
+            "host": "localhost",
+            "port": 9545,
+            "chainId": 4447,
+            "gas": "0x100000",
+            "gasPrice": "0x02"
+        },
+        "coverage": {
+            "host": "localhost",
+            "port": 8555,
+            "chainId": 4447,
+            "gas": "0x100000",
+            "gasPrice": "0x02"
+        },
+        "ropsten": {
+            "host": "ropsten.validity.io",
+            "port": 8545,
+            "chainId": 3,
+            "gas": "0x3d0900",
+            "gasPrice": "0xee6b2800",
+            "from": ""
+        }
+    }
+}
