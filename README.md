@@ -61,7 +61,7 @@ Not comprehensive assesment of security issues
 ### Economic attacks
 1. Front running - a informed attacker can buy many tokens before a specific proposal will be made. He then can use this weight to nudge the outcome towards his advantage.
 
-##Further Improvements
+## Further Improvements
 Some suggestions what to do next:
 1. Develop a EIP standard for token voting
 2. Allow for multiple proposals in parallel
