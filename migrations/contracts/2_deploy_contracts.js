@@ -1,18 +1,33 @@
-var moment = require("moment");
+const moment = require('moment');
 
-const LoggedTokenCrowdsale = artifacts.require('LoggedTokenCrowdsale')
-const Crowdsale = artifacts.require('Crowdsale')
-const BudgetWallet = artifacts.require('BudgetWallet')
-const LoggedToken = artifacts.require('LoggedToken')
-const MintableToken = artifacts.require('MintableToken')
-const BudgetProposalVoting = artifacts.require('BudgetProposalVoting')
+const LoggedTokenCrowdsale = artifacts.require('LoggedTokenCrowdsale');
+const BudgetWallet = artifacts.require('BudgetWallet');
+const LoggedToken = artifacts.require('LoggedToken');
+const BudgetProposalVoting = artifacts.require('BudgetProposalVoting');
 
+module.exports = async (deployer) => {
+    const startTime = moment(new Date('2019-12-12')).format('X');
+    const endTime = moment(new Date('2020-12-12')).format('X');
+    const rate = 12;
 
-module.exports = function (deployer) {
-  startTime = moment(new Date('2019-12-12')).format('X')
-  endTime = moment(new Date('2020-12-12')).format('X')
+    let tokenAddress;
+    let crowdsaleInstance;
+    deployer.deploy(BudgetWallet)
+        .then(()=>{
+            return deployer.deploy(LoggedTokenCrowdsale, startTime, endTime, rate, BudgetWallet.address);
+        })
+        .then( () => {
+             return LoggedTokenCrowdsale.deployed();
+        })
+        .then( (instance) => {
+            console.log("crowdsaleInstance address: ", instance.address);
+            crowdsaleInstance = instance;
+            return crowdsaleInstance.token();
+        })
+        .then( (address) => {
+            console.log("token address: ", address);
+            const tokenInstance  =  LoggedToken.at(address);
+            deployer.deploy(BudgetProposalVoting, BudgetWallet.address, tokenInstance);
+        });
 
-  deployer.deploy(BudgetWallet).then( () => {
-    deployer.deploy(LoggedTokenCrowdsale, startTime, endTime, 12, BudgetWallet.address)
-  }).then(() => console.log('finished'))
 };
