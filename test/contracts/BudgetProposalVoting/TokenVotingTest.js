@@ -39,7 +39,7 @@ contract('BudgetProposalVoting', (accounts) => {
         voting      = await BudgetProposalVoting.deployed();
         let tokenAddress = await voting.token();
         token       = await LoggedToken.at(tokenAddress);
-        // crowdsale   = await LoggedTokenCrowdsale.deployed();
+        crowdsale   = await LoggedTokenCrowdsale.deployed();
     });
 
     /**
@@ -48,13 +48,13 @@ contract('BudgetProposalVoting', (accounts) => {
 
     it('execute a crowdsale', async () => {
         console.log('[ Pre contribution period ]'.yellow);
-        //await increaseTimeTo(crowdsale.startTime.call());
+        const time = await crowdsale.startTime() + 1;
+        console.log('move to time ', time);
+        await increaseTimeTo(time);
         // const tx  = await crowdsale.buyTokens(
         //     voter1,
         //     {from: voter1, gas: 1000000, value: web3.toWei(20, 'ether')}
         // );
-
-
     });
 
     // it('should verify, the owner is added properly to manager accounts', async () => {
