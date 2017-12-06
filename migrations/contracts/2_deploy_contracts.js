@@ -4,6 +4,8 @@ const LoggedTokenCrowdsale = artifacts.require('LoggedTokenCrowdsale');
 const BudgetWallet = artifacts.require('BudgetWallet');
 const LoggedToken = artifacts.require('LoggedToken');
 const BudgetProposalVoting = artifacts.require('BudgetProposalVoting');
+const SimpleElectionStrategy = artifacts.require('SimpleElectionStrategy');
+
 
 module.exports = async (deployer) => {
     const startTime = moment(new Date('2019-12-12')).format('X');
@@ -13,6 +15,9 @@ module.exports = async (deployer) => {
     let tokenAddress;
     let crowdsaleInstance;
     deployer.deploy(BudgetWallet)
+        .then( () => {
+            return deployer.deploy(SimpleElectionStrategy); //TODO: change strategy if needed
+        })
         .then(()=>{
             return deployer.deploy(LoggedTokenCrowdsale, startTime, endTime, rate, BudgetWallet.address);
         })
@@ -27,7 +32,7 @@ module.exports = async (deployer) => {
         .then( (address) => {
             console.log("token address: ", address);
             const tokenInstance  =  LoggedToken.at(address);
-            deployer.deploy(BudgetProposalVoting, BudgetWallet.address, tokenInstance);
+            deployer.deploy(BudgetProposalVoting, BudgetWallet.address, tokenInstance, SimpleElectionStrategy.at(SimpleElectionStrategy.address));
         });
 
 };
