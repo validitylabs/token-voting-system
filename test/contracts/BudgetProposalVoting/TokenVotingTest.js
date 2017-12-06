@@ -6,9 +6,10 @@
 
 import {assertJump, waitNDays, getEvents, BigNumber, cnf, increaseTimeTo} from '../helpers/tools';
 
-const BudgetProposalVoting  = artifacts.require('./BudgetProposalVoting');
+const BudgetProposalVoting = artifacts.require('./BudgetProposalVoting');
 const LoggedToken          = artifacts.require('./LoggedToken');
-const BudgetWallet          = artifacts.require('./BudgetWallet');
+const BudgetWallet         = artifacts.require('./BudgetWallet');
+const LoggedTokenCrowdsale = artifacts.require('./LoggedTokenCrowdsale');
 
 
 const should = require('chai') // eslint-disable-line
@@ -29,42 +30,32 @@ contract('BudgetProposalVoting', (accounts) => {
     const voter3   = accounts[3];
 
     // Provide icoTokenInstance for every test case
-    let votingInstance;
-    let tokenInstance;
-    let walletInstance;
+    let voting;
+    let token;
+    let wallet;
+    let crowdsale;
 
     beforeEach(async () => {
-        votingInstance      = await BudgetProposalVoting.deployed();
-        const tokenAddress  = await votingInstance.token();
-        tokenInstance       = await LoggedToken.at(tokenAddress);
+        voting      = await BudgetProposalVoting.deployed();
+        let tokenAddress = await voting.token();
+        token       = await LoggedToken.at(tokenAddress);
+        // crowdsale   = await LoggedTokenCrowdsale.deployed();
     });
 
     /**
      * [ Pre contribution period ]
      */
 
-    // it('should instantiate the ICO crowdsale correctly', async () => {
-    //     console.log('[ Pre contribution period ]'.yellow);
+    it('execute a crowdsale', async () => {
+        console.log('[ Pre contribution period ]'.yellow);
+        //await increaseTimeTo(crowdsale.startTime.call());
+        // const tx  = await crowdsale.buyTokens(
+        //     voter1,
+        //     {from: voter1, gas: 1000000, value: web3.toWei(20, 'ether')}
+        // );
 
-    //     // Set DTS to 2017-12-24T00:00:00Z CET
-    //     await increaseTimeTo(1514113200);
 
-    //     const _startTime            = await votingInstance.startTime();
-    //     const _endTime              = await votingInstance.endTime();
-    //     const _weiPerChf            = await votingInstance.weiPerChf();
-    //     const _wallet               = await votingInstance.wallet();
-    //     const _cap                  = await votingInstance.cap();
-    //     const _confirmationPeriod   = await votingInstance.confirmationPeriod();
-    //     const bigCap                = new BigNumber(cnf.cap);
-    //     const confirmationPeriod    = new BigNumber(cnf.confirmationPeriod);
-
-    //     _startTime.should.be.bignumber.equal(cnf.startTime);
-    //     _endTime.should.be.bignumber.equal(cnf.endTime);
-    //     _weiPerChf.should.be.bignumber.equal(cnf.rateWeiPerChf);
-    //     _wallet.should.be.equal(wallet);
-    //     _cap.should.be.bignumber.equal(bigCap.mul(10e18));
-    //     _confirmationPeriod.div(60 * 60 * 24).should.be.bignumber.equal(confirmationPeriod);
-    // });
+    });
 
     // it('should verify, the owner is added properly to manager accounts', async () => {
     //     const manager = await votingInstance.isManager(owner);

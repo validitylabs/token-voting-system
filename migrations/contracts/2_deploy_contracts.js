@@ -31,11 +31,17 @@ module.exports = async (deployer) => {
             return crowdsaleInstance.token();
         })
         .then( (address) => {
-            console.log('token address: ', address);
             const tokenInstance  =  LoggedToken.at(address);
-            return deployer.deploy(BudgetProposalVoting, BudgetWallet.address, tokenInstance, SimpleElectionStrategy.at(SimpleElectionStrategy.address));
+            return deployer.deploy(BudgetProposalVoting, BudgetWallet.address, address, SimpleElectionStrategy.address);
         })
         .then( () => {
+            return BudgetProposalVoting.deployed();
+        })
+        .then( (voting) => {
+            voting.token.call().then(
+                function (res){
+                    console.log('token address: ', res);
+                });
             return BudgetWallet.deployed();
         })
         .then( (wallet) => {

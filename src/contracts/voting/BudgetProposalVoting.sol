@@ -9,9 +9,9 @@ import './ElectionStrategy.sol';
 
 contract BudgetProposalVoting is Ownable {
 
-    BudgetWallet wallet;
+    BudgetWallet public wallet;
 
-    LoggedToken token;
+    LoggedToken public token;
 
     struct Proposal {
         uint  amount;
@@ -72,6 +72,9 @@ contract BudgetProposalVoting is Ownable {
     event ProposalVoted(address voter, uint votes, bool isYes);
 
     function BudgetProposalVoting(BudgetWallet _wallet, LoggedToken _token, ElectionStrategy _electionStrategy) public Ownable() {
+        require(address(_token) != address(0x0));
+        require(address(_wallet) != address(0x0));
+        require(address(_electionStrategy) != address(0x0));
         wallet = _wallet;
         token = _token;
         electionStrategy = _electionStrategy;
