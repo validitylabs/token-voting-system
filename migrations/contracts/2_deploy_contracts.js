@@ -8,9 +8,11 @@ const SimpleElectionStrategy = artifacts.require('SimpleElectionStrategy');
 
 
 module.exports = async (deployer) => {
+    //TODO: Config these values
     const startTime = moment(new Date('2019-12-12')).format('X');
     const endTime = moment(new Date('2020-12-12')).format('X');
     const rate = 12;
+    const owner= web3.eth.coinbase;
 
     let tokenAddress;
     let crowdsaleInstance;
@@ -32,7 +34,11 @@ module.exports = async (deployer) => {
         .then( (address) => {
             console.log("token address: ", address);
             const tokenInstance  =  LoggedToken.at(address);
-            deployer.deploy(BudgetProposalVoting, BudgetWallet.address, tokenInstance, SimpleElectionStrategy.at(SimpleElectionStrategy.address));
+            return deployer.deploy(BudgetProposalVoting, BudgetWallet.address, tokenInstance, SimpleElectionStrategy.at(SimpleElectionStrategy.address));
+        })
+        .then( (votingsystem) => {
+            BudgetWallet.at(BudgetWallet.address).transferOwnership(votingsystem);
+            console.log("ownership of budgetwallet transfered to votingsystem.");
         });
 
 };

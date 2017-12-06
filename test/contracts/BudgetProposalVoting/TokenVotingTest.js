@@ -7,9 +7,9 @@
 import {assertJump, waitNDays, getEvents, BigNumber, cnf, increaseTimeTo} from '../helpers/tools';
 
 const BudgetProposalVoting  = artifacts.require('./BudgetProposalVoting');
-const LoggingToken      = artifacts.require('./LoggingToken');
-const BudgetWallet = artifacts.require('./BudgetWallet')
-const Proposal = artifacts.require('./Proposal')
+const LoggingToken          = artifacts.require('./LoggingToken');
+const BudgetWallet          = artifacts.require('./BudgetWallet');
+
 
 const should = require('chai') // eslint-disable-line
     .use(require('chai-as-promised'))
@@ -34,9 +34,9 @@ contract('BudgetProposalVoting', (accounts) => {
     let walletInstance;
 
     beforeEach(async () => {
-        votingInstance    = await BudgetProposalVoting.deployed();
-        const tokenAddress   = await votingInstance.token();
-        tokenInstance        = await LoggedToken.at(tokenAddress);
+        votingInstance      = await BudgetProposalVoting.deployed();
+        const tokenAddress  = await votingInstance.token();
+        tokenInstance       = await LoggedToken.at(tokenAddress);
     });
 
     /**
