@@ -1,7 +1,6 @@
-#Architecture 'Vote By Token Shares'
-##Purpose and Functional Requirements
-roland.kofler@validitylabs.org
-2017-11-25
+# Architecture 'Vote By Token Shares'
+
+## Purpose and Functional Requirements
 
 The purpose of this contracts is to allow to vote with tokens on proposals and assign budgets to it.
 > We are basing our work heavily on the OpenZeppelin Solidity library. On top of a vanilla Crowdsale we need the ability to keep Ether in Escrow and perform a proposal-vote-payout mechanism. e.g.:
