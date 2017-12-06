@@ -7,7 +7,7 @@
 import {assertJump, waitNDays, getEvents, BigNumber, cnf, increaseTimeTo} from '../helpers/tools';
 
 const BudgetProposalVoting  = artifacts.require('./BudgetProposalVoting');
-const LoggingToken          = artifacts.require('./LoggingToken');
+const LoggedToken          = artifacts.require('./LoggedToken');
 const BudgetWallet          = artifacts.require('./BudgetWallet');
 
 

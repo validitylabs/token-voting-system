@@ -15,30 +15,32 @@ module.exports = async (deployer) => {
     const owner= web3.eth.coinbase;
 
     let tokenAddress;
-    let crowdsaleInstance;
+
     deployer.deploy(BudgetWallet)
         .then( () => {
             return deployer.deploy(SimpleElectionStrategy); //TODO: change strategy if needed
         })
-        .then(()=>{
+        .then(() => {
             return deployer.deploy(LoggedTokenCrowdsale, startTime, endTime, rate, BudgetWallet.address);
         })
         .then( () => {
-             return LoggedTokenCrowdsale.deployed();
+            return LoggedTokenCrowdsale.deployed();
         })
-        .then( (instance) => {
-            console.log("crowdsaleInstance address: ", instance.address);
-            crowdsaleInstance = instance;
+        .then( (crowdsaleInstance) => {
+            console.log('crowdsaleInstance address: ', crowdsaleInstance.address);
             return crowdsaleInstance.token();
         })
         .then( (address) => {
-            console.log("token address: ", address);
+            console.log('token address: ', address);
             const tokenInstance  =  LoggedToken.at(address);
             return deployer.deploy(BudgetProposalVoting, BudgetWallet.address, tokenInstance, SimpleElectionStrategy.at(SimpleElectionStrategy.address));
         })
-        .then( (votingsystem) => {
-            BudgetWallet.at(BudgetWallet.address).transferOwnership(votingsystem);
-            console.log("ownership of budgetwallet transfered to votingsystem.");
+        .then( () => {
+            return BudgetWallet.deployed();
+        })
+        .then( (wallet) => {
+            wallet.transferOwnership(BudgetProposalVoting.address);
+            console.log(`ownership of BudgetWallet ${wallet.address} transfered to BudgetProposalVoting ${BudgetProposalVoting.address}.`);
         });
 
 };
