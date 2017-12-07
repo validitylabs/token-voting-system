@@ -89,9 +89,9 @@ contract BudgetProposalVoting is Ownable {
     }
 
     event ProposalVoted(address voter, uint votes, bool isYes);
-    function vote(bool isYes) public timedTransitions atStage(Stages.AcceptingVotes) {
+    function vote(bool isYes) public timedTransitions  {
         uint balance = token.balanceOfAt(msg.sender, currentProposal().blocktime);
-        require(balance > 0);
+       // require(balance > 0);
         vote(proposals[proposals.length - 1], msg.sender, balance, isYes);
         ProposalVoted(msg.sender, balance, isYes);
     }

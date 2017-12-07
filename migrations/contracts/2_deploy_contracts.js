@@ -26,9 +26,17 @@ module.exports = async (deployer) => {
         .then( () => {
             return LoggedTokenCrowdsale.deployed();
         })
-        .then( (crowdsaleInstance) => {
-            console.log('crowdsaleInstance address: ', crowdsaleInstance.address);
-            return crowdsaleInstance.token();
+        .then( (crowdsale) => {
+            console.log('crowdsaleInstance address: ', crowdsale.address);
+            crowdsale.token.call().then(
+                function (res) { // eslint-disable-line
+                    console.log('crowdsale.token address: ', res);
+                });
+            crowdsale.wallet.call().then(
+                function (res){ // eslint-disable-line
+                    console.log('crowdsale.wallet address: ', res);
+                });
+            return crowdsale.token();
         })
         .then( (address) => {
             const tokenInstance  =  LoggedToken.at(address);

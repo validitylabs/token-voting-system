@@ -9,7 +9,7 @@ import './BudgetWallet.sol';
 contract LoggedTokenCrowdsale is FinalizableCrowdsale {
     LoggedToken public loggedToken;
 
-    function LoggedTokenCrowdsale(uint256 _startTime, uint256 _endTime, uint256 _rate, BudgetWallet _wallet) public Crowdsale(_startTime, _endTime, _rate, _wallet.owner()) {
+    function LoggedTokenCrowdsale(uint256 _startTime, uint256 _endTime, uint256 _rate, BudgetWallet _wallet) public Crowdsale(_startTime, _endTime, _rate, _wallet) {
     }
 
     // created a logged token and exposes it

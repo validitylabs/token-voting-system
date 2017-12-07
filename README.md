@@ -1,3 +1,8 @@
+
+# Readme
+## Caveats
+Currently tests are not repeatable executable in the truffle console, but work well with `truffle test`
+
 # Architecture 'Vote By Token Shares'
 
 ## Purpose and Functional Requirements
@@ -25,7 +30,7 @@ Derived from the functional requirements no specific Quality Attributes arise.
   <figcaption> </figcaption>
 </figure>
 
-*LoggedTokenCrowdsale*  extend Zeppelins Crowdsale and overrides [createTokenContract()](https://github.com/OpenZeppelin/zeppelin-solidity/blob/master/contracts/crowdsale/Crowdsale.sol#L58") so that we can use our *LoggedToken*. LoggedToken extends *MintableToken* with a feature copied by MiniMeToken: [balanceOfAt(address _owner, uint _blockNumber)](https://github.com/Giveth/minime/blob/master/contracts/MiniMeToken.sol#L282). 
+*LoggedTokenCrowdsale*  extend Zeppelins Crowdsale and overrides [createTokenContract()](https://github.com/OpenZeppelin/zeppelin-solidity/blob/master/contracts/crowdsale/Crowdsale.sol#L58") so that we can use our *LoggedToken*. LoggedToken extends *MintableToken* with a feature copied by MiniMeToken: [balanceOfAt(address _owner, uint _blockNumber)](https://github.com/Giveth/minime/blob/master/contracts/MiniMeToken.sol#L282).
 
 This feature is used to snapshot the balance of tokens at proposal creation time. Only those addresses who hold tokens at the given blockheight can then vote on the proposal. *VotingStrategy* encapsulates the algorithm to decide the outcome of a *Proposal* ballot. This would make it easy to change the logic for the next foreseable step: requiring a minimal voting threshold (i.e. a *Quorum*)
 
@@ -59,7 +64,7 @@ Voting rule is:
  1. Each tokenholder at proposal time blockheight can vote with the weight of his token.
  2. as long as the voting period is not over
  3. he can do this only once per proposal
- 
+
 ![Proposal Struct UML Class Diagram](https://docs.google.com/drawings/d/e/2PACX-1vSCa5LAdKXLdO84SY8epOJXmy_p5Ac3Ouv1XSH_FzAZ_P7SfyfqL1ZJcC8OlG_2zeRc7gFa4O6PnnQx/pub?w=656&h=158)
 
 ### 4. Redemption of the budget

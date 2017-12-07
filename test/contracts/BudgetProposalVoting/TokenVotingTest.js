@@ -41,35 +41,42 @@ contract('BudgetProposalVoting', (accounts) => {
         let tokenAddress = await voting.token();
         token       = await LoggedToken.at(tokenAddress);
         crowdsale   = await LoggedTokenCrowdsale.deployed();
+        wallet      = await BudgetWallet.deployed();
     });
 
     /**
      * [ crowdsale period ]
      */
 
-    it('execute a crowdsale', async () => {
+    it('move to time of crowdsale', async () => {
         console.log('[ crowdsale period ]'.yellow);
-        const time = await crowdsale.startTime();
-        await increaseTimeTo(time.plus(1));
-        console.log('moved to time', web3.eth.getBlock(web3.eth.blockNumber).timestamp);
+        const time = Number(await crowdsale.startTime()) + 1;
+        await increaseTimeTo(time);
+        assert.isAtLeast(web3.eth.getBlock(web3.eth.blockNumber).timestamp, time);
+    });
+
+    it('execute a crowdsale', async () => {
         const tx1  = await crowdsale.buyTokens(
             activeInvestor1,
-            {from: activeInvestor1, gas: 1000000, value: web3.toWei(20, 'ether')}
+            {from: activeInvestor1, gas: 1000000, value: 20e+18}
         );
         const tx2  = await crowdsale.buyTokens(
             activeInvestor2,
-            {from: activeInvestor2, gas: 1000000, value: web3.toWei(30, 'ether')}
+            {from: activeInvestor2, gas: 1000000, value: 30e+18}
         );
         const tx3  = await crowdsale.buyTokens(
             activeInvestor3,
-            {from: activeInvestor3, gas: 1000000, value: web3.toWei(50, 'ether')}
+            {from: activeInvestor3, gas: 1000000, value: 50e+18}
         );
         const events = getEvents(tx1, 'TokenPurchase');
 
         assert.equal(events[0].purchaser, activeInvestor1, 'activeInvestor2 does not match purchaser');
         assert.equal(events[0].beneficiary, activeInvestor1, 'activeInvestor1 does not match beneficiary');
 
-        events[0].value.should.be.bignumber.equal(web3.toWei(20, 'ether'));
+        events[0].value.should.be.bignumber.equal(20e+18);
+        assert.equal(await voting.wallet(), await crowdsale.wallet());
+        const balance = web3.eth.getBalance(wallet.address).toNumber();
+        assert.equal(balance, 100e+18);
 
     });
 
@@ -109,13 +116,30 @@ contract('BudgetProposalVoting', (accounts) => {
         assert.equal(props[2], 'http://cryptokitten.io');
         assert.equal(props[3], '0x1230000000000000000000000000000000000000000000000000000000000000');
         assert.equal(props[4], beneficiary);
-
     });
 
     it('should AcceptingVotes', async () => {
         console.log('[ accepting votes period ]'.yellow);
         const stage  = await voting.stage();
         assert.equal(stage, 1, 'stage not in AcceptingVotes');
+    });
+
+    it('should be able to vote', async () => {
+        const tx1 = await voting.vote(
+            false,
+            { from: activeInvestor1, gas: 1000000 }
+        );
+        const tx2 = await voting.vote(
+            true,
+            { from: activeInvestor2, gas: 1000000 }
+        );
+        const events = getEvents(tx1, 'ProposalVoted');
+
+        const props = await voting.proposals(0);
+
+        assert.equal(props[5], 20);
+        assert.equal(props[6], 30);
+
     });
 
     // it('should buyTokens properly', async () => {
