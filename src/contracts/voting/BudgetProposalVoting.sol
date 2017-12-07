@@ -15,14 +15,14 @@ contract BudgetProposalVoting is Ownable {
 
     struct Proposal {
         uint  amount;
-        uint  blocktime ;
         string  name;
         string  url;
         bytes32  hashvalue;
-        mapping(address => bool)  hasVoted;
+        address  beneficiaryAccount;
+        uint  blocktime ;
         uint  countYesVotes;
         uint  countNoVotes;
-        address  beneficiaryAccount;
+        mapping(address => bool)  hasVoted;
     }
 
     Proposal[] public proposals;
@@ -83,7 +83,7 @@ contract BudgetProposalVoting is Ownable {
     function createProposal(uint _amount, string _name, string _url, bytes32 _hashvalue, address _beneficiary)
         public onlyOwner() timedTransitions atStage(Stages.AcceptingProposal){
         //TODO: require(token.mintingFinished());//Checklist: this requires that minting can't be restarted in MintableToken.
-        proposals.push( Proposal(_amount, block.timestamp, _name, _url, _hashvalue, 0,0,_beneficiary));
+        proposals.push( Proposal(_amount, _name, _url, _hashvalue,_beneficiary, block.timestamp, 0,0));
         stage= Stages.AcceptingVotes;
         ProposalCreated(_amount, _name, _url, _hashvalue, _beneficiary);
     }

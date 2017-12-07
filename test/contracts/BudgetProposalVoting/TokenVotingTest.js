@@ -99,6 +99,11 @@ contract('BudgetProposalVoting', (accounts) => {
         assert.equal(events[0].name, 'buy Cryptokitten for me', 'Event doesnt exist');
         const props = await voting.proposals(0);
         assert.equal(props[0], web3.toWei(123, 'ether'));
+        assert.equal(props[1], 'buy Cryptokitten for me');
+        assert.equal(props[2], 'http://cryptokitten.io');
+        assert.equal(props[3], '0x1230000000000000000000000000000000000000000000000000000000000000');
+        assert.equal(props[4], beneficiary);
+
     });
 
 
