@@ -85,8 +85,14 @@ contract('BudgetProposalVoting', (accounts) => {
      * [ accept proposal period ]
      */
 
+    it('should AcceptingProposals', async () => {
+        console.log('[ accepting proposals period ]'.yellow);
+        const stage  = await voting.stage();
+        assert.equal(stage, 0, 'stage not in AcceptingProposals');
+    });
+
     it('should be able to make a proposal', async () => {
-        console.log('[ accept proposal period ]'.yellow);
+
         const tx1  = await voting.createProposal(
             web3.toWei(123, 'ether'),
             'buy Cryptokitten for me',
@@ -106,6 +112,11 @@ contract('BudgetProposalVoting', (accounts) => {
 
     });
 
+    it('should AcceptingVotes', async () => {
+        console.log('[ accepting votes period ]'.yellow);
+        const stage  = await voting.stage();
+        assert.equal(stage, 1, 'stage not in AcceptingVotes');
+    });
 
     // it('should buyTokens properly', async () => {
     //     const tx    = await votingInstance.buyTokens(
