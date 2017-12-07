@@ -20,8 +20,8 @@ contract BudgetProposalVoting is Ownable {
         bytes32  hashvalue;
         address  beneficiaryAccount;
         uint  blocktime ;
-        uint  countYesVotes;
         uint  countNoVotes;
+        uint  countYesVotes;
         mapping(address => bool)  hasVoted;
     }
 
@@ -90,10 +90,15 @@ contract BudgetProposalVoting is Ownable {
 
     event ProposalVoted(address voter, uint votes, bool isYes);
     function vote(bool isYes) public timedTransitions  {
-        uint balance = token.balanceOfAt(msg.sender, currentProposal().blocktime);
-       // require(balance > 0);
-        vote(proposals[proposals.length - 1], msg.sender, balance, isYes);
-        ProposalVoted(msg.sender, balance, isYes);
+        uint votes = token.balanceOfAt(msg.sender, currentProposal().blocktime);
+        require(votes > 0);
+        Proposal storage proposal = proposals[proposals.length - 1];
+        require(!proposal.hasVoted[msg.sender]);
+        if (isYes)
+            proposal.countYesVotes = proposal.countYesVotes + votes;
+        else
+            proposal.countNoVotes = proposal.countNoVotes + votes;
+        ProposalVoted(msg.sender, votes, isYes);
     }
 
     function claimFunds() public timedTransitions atStage(Stages.AcceptingPayoutClaims) {
@@ -105,12 +110,6 @@ contract BudgetProposalVoting is Ownable {
         return proposals[proposals.length - 1];
     }
 
-    function vote(Proposal storage proposal, address voter, uint votes, bool isYes) internal onlyOwner {
-            require(!proposal.hasVoted[voter]);
-            if (isYes)
-              proposal.countYesVotes = proposal.countYesVotes + votes;
-            else
-              proposal.countNoVotes = proposal.countNoVotes + votes;
-    }
+
 
 }

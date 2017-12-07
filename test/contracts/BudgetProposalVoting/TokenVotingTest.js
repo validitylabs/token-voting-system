@@ -19,7 +19,17 @@ const should = require('chai') // eslint-disable-line
 
 const zero      = new BigNumber(0);
 const two       = new BigNumber(web3.toWei(2, 'ether'));
-
+const Proposal = {
+    amount: 0,
+    name: 1,
+    url: 2,
+    hashvalue: 3,
+    beneficiaryAccount: 4,
+    blocktime: 5,
+    countNoVotes: 6,
+    countYesVotes: 7,
+    hasVoted: 8
+}
 /**
  * BudgetProposalVoting contract
  */
@@ -111,11 +121,11 @@ contract('BudgetProposalVoting', (accounts) => {
         const events = getEvents(tx1, 'ProposalCreated');
         assert.equal(events[0].name, 'buy Cryptokitten for me', 'Event doesnt exist');
         const props = await voting.proposals(0);
-        assert.equal(props[0], web3.toWei(123, 'ether'));
-        assert.equal(props[1], 'buy Cryptokitten for me');
-        assert.equal(props[2], 'http://cryptokitten.io');
-        assert.equal(props[3], '0x1230000000000000000000000000000000000000000000000000000000000000');
-        assert.equal(props[4], beneficiary);
+        assert.equal(props[Proposal.amount], web3.toWei(123, 'ether'));
+        assert.equal(props[Proposal.name], 'buy Cryptokitten for me');
+        assert.equal(props[Proposal.url], 'http://cryptokitten.io');
+        assert.equal(props[Proposal.hashvalue], '0x1230000000000000000000000000000000000000000000000000000000000000');
+        assert.equal(props[Proposal.beneficiaryAccount], beneficiary);
     });
 
     it('should AcceptingVotes', async () => {
@@ -137,8 +147,8 @@ contract('BudgetProposalVoting', (accounts) => {
 
         const props = await voting.proposals(0);
 
-        assert.equal(props[5], 20);
-        assert.equal(props[6], 30);
+        assert.equal(props[Proposal.countNoVotes].toNumber(), 20e+18);
+        assert.equal(props[Proposal.countYesVotes].toNumber(), 30e+18);
 
     });
 
