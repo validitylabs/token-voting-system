@@ -92,9 +92,9 @@ contract('BudgetProposalVoting', (accounts) => {
 
     it('should move to time after crowdsale', async () => {
 
-        const time = await crowdsale.endTime();
+        const time = Number(await crowdsale.endTime());
         await increaseTimeTo(time.plus(1));
-        console.log('moved to time', web3.eth.getBlock(web3.eth.blockNumber).timestamp);
+        assert.isAtLeast(web3.eth.getBlock(web3.eth.blockNumber).timestamp, time);
     });
 
 
