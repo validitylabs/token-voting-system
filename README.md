@@ -1,7 +1,7 @@
 
 # Readme
 ## Caveats
-Currently tests are not repeatable executable in the truffle console, but work well with `truffle test`
+Currently tests are not repeatable executable in the `truffle develop`, but work well with `truffle test`
 
 # Architecture 'Vote By Token Shares'
 
