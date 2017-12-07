@@ -25,7 +25,7 @@ contract BudgetProposalVoting is Ownable {
         address  beneficiaryAccount;
     }
 
-    Proposal[] proposals;
+    Proposal[] public proposals;
 
     enum Stages {
     AcceptingProposal,
@@ -67,9 +67,8 @@ contract BudgetProposalVoting is Ownable {
 
     uint constant LOCKUP_PERIOD = 20 days;
 
-    ElectionStrategy electionStrategy;
+    ElectionStrategy public electionStrategy;
 
-    event ProposalVoted(address voter, uint votes, bool isYes);
 
     function BudgetProposalVoting(BudgetWallet _wallet, LoggedToken _token, ElectionStrategy _electionStrategy) public Ownable() {
         require(address(_token) != address(0x0));
@@ -80,14 +79,16 @@ contract BudgetProposalVoting is Ownable {
         electionStrategy = _electionStrategy;
     }
 
-
+    event ProposalCreated(uint amount, string name, string url, bytes32 hashvalue, address beneficiary);
     function createProposal(uint _amount, string _name, string _url, bytes32 _hashvalue, address _beneficiary)
         public onlyOwner() timedTransitions atStage(Stages.AcceptingProposal){
-        require(token.mintingFinished());//Checklist: this requires that minting can't be restarted in MintableToken.
+        //TODO: require(token.mintingFinished());//Checklist: this requires that minting can't be restarted in MintableToken.
         proposals.push( Proposal(_amount, block.timestamp, _name, _url, _hashvalue, 0,0,_beneficiary));
         stage= Stages.AcceptingVotes;
+        ProposalCreated(_amount, _name, _url, _hashvalue, _beneficiary);
     }
 
+    event ProposalVoted(address voter, uint votes, bool isYes);
     function vote(bool isYes) public timedTransitions atStage(Stages.AcceptingVotes) {
         uint balance = token.balanceOfAt(msg.sender, currentProposal().blocktime);
         require(balance > 0);

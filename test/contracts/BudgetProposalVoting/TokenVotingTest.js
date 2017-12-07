@@ -17,17 +17,18 @@ const should = require('chai') // eslint-disable-line
     .use(require('chai-bignumber')(BigNumber))
     .should();
 
-//const zero      = new BigNumber(0);
-//const two       = new BigNumber(web3.toWei(2, 'ether'));
+const zero      = new BigNumber(0);
+const two       = new BigNumber(web3.toWei(2, 'ether'));
 
 /**
  * BudgetProposalVoting contract
  */
 contract('BudgetProposalVoting', (accounts) => {
     const owner    = accounts[0];
-    const voter1   = accounts[1];
-    const voter2   = accounts[2];
-    const voter3   = accounts[3];
+    const activeInvestor1   = accounts[1];
+    const activeInvestor2   = accounts[2];
+    const activeInvestor3   = accounts[3];
+    const beneficiary       = accounts[4];
 
     // Provide icoTokenInstance for every test case
     let voting;
@@ -43,315 +44,63 @@ contract('BudgetProposalVoting', (accounts) => {
     });
 
     /**
-     * [ Pre contribution period ]
+     * [ crowdsale period ]
      */
 
     it('execute a crowdsale', async () => {
-        console.log('[ Pre contribution period ]'.yellow);
-        const time = await crowdsale.startTime() + 1;
-        console.log('move to time ', time);
-        await increaseTimeTo(time);
-        // const tx  = await crowdsale.buyTokens(
-        //     voter1,
-        //     {from: voter1, gas: 1000000, value: web3.toWei(20, 'ether')}
-        // );
+        console.log('[ crowdsale period ]'.yellow);
+        const time = await crowdsale.startTime();
+        await increaseTimeTo(time.plus(1));
+        console.log('moved to time', web3.eth.getBlock(web3.eth.blockNumber).timestamp);
+        const tx1  = await crowdsale.buyTokens(
+            activeInvestor1,
+            {from: activeInvestor1, gas: 1000000, value: web3.toWei(20, 'ether')}
+        );
+        const tx2  = await crowdsale.buyTokens(
+            activeInvestor2,
+            {from: activeInvestor2, gas: 1000000, value: web3.toWei(30, 'ether')}
+        );
+        const tx3  = await crowdsale.buyTokens(
+            activeInvestor3,
+            {from: activeInvestor3, gas: 1000000, value: web3.toWei(50, 'ether')}
+        );
+        const events = getEvents(tx1, 'TokenPurchase');
+
+        assert.equal(events[0].purchaser, activeInvestor1, 'activeInvestor2 does not match purchaser');
+        assert.equal(events[0].beneficiary, activeInvestor1, 'activeInvestor1 does not match beneficiary');
+
+        events[0].value.should.be.bignumber.equal(web3.toWei(20, 'ether'));
+
     });
 
-    // it('should verify, the owner is added properly to manager accounts', async () => {
-    //     const manager = await votingInstance.isManager(owner);
+    it('should move to time after crowdsale', async () => {
+
+        const time = await crowdsale.endTime();
+        await increaseTimeTo(time.plus(1));
+        console.log('moved to time', web3.eth.getBlock(web3.eth.blockNumber).timestamp);
+    });
+
+
+    /**
+     * [ accept proposal period ]
+     */
+
+    it('should be able to make a proposal', async () => {
+        console.log('[ accept proposal period ]'.yellow);
+        const tx1  = await voting.createProposal(
+            web3.toWei(123, 'ether'),
+            'buy Cryptokitten for me',
+            'http://cryptokitten.io',
+            '0x123',
+            beneficiary,
+            {from: owner, gas: 1000000}
+        );
+        const events = getEvents(tx1, 'ProposalCreated');
+        assert.equal(events[0].name, 'buy Cryptokitten for me', 'Event doesnt exist');
+        const props = await voting.proposals(0);
+        assert.equal(props[0], web3.toWei(123, 'ether'));
+    });
 
-    //     assert.isTrue(manager, 'Owner should be a manager too');
-    // });
-
-    // it('should set manager accounts', async () => {
-    //     const tx1 = await votingInstance.setManager(activeManager, true, {from: owner, gas: 1000000});
-    //     const tx2 = await votingInstance.setManager(inactiveManager, false, {from: owner, gas: 1000000});
-
-    //     const manager1 = await votingInstance.isManager(activeManager);
-    //     const manager2 = await votingInstance.isManager(inactiveManager);
-
-    //     assert.isTrue(manager1, 'Manager 1 should be active');
-    //     assert.isFalse(manager2, 'Manager 2 should be inactive');
-
-    //     // Testing events
-    //     const events1 = getEvents(tx1, 'ChangedManager');
-    //     const events2 = getEvents(tx2, 'ChangedManager');
-
-    //     assert.equal(events1[0].manager, activeManager, 'activeManager address does not match');
-    //     assert.isTrue(events1[0].active, 'activeManager expected to be active');
-
-    //     assert.equal(events2[0].manager, inactiveManager, 'inactiveManager address does not match');
-    //     assert.isFalse(events2[0].active, 'inactiveManager expected to be inactive');
-    // });
-
-    // it('should alter manager accounts', async () => {
-    //     const tx1 = await votingInstance.setManager(activeManager, false, {from: owner, gas: 1000000});
-    //     const tx2 = await votingInstance.setManager(inactiveManager, true, {from: owner, gas: 1000000});
-
-    //     const manager1 = await votingInstance.isManager(activeManager);
-    //     const manager2 = await votingInstance.isManager(inactiveManager);
-
-    //     assert.isFalse(manager1, 'Manager 1 should be inactive');
-    //     assert.isTrue(manager2, 'Manager 2 should be active');
-
-    //     // Testing events
-    //     const events1 = getEvents(tx1, 'ChangedManager');
-    //     const events2 = getEvents(tx2, 'ChangedManager');
-
-    //     assert.isFalse(events1[0].active, 'activeManager expected to be inactive');
-    //     assert.isTrue(events2[0].active, 'inactiveManager expected to be active');
-
-    //     // Roll back to origin values
-    //     const tx3 = await votingInstance.setManager(activeManager, true, {from: owner, gas: 1000000});
-    //     const tx4 = await votingInstance.setManager(inactiveManager, false, {from: owner, gas: 1000000});
-
-    //     const manager3 = await votingInstance.isManager(activeManager);
-    //     const manager4 = await votingInstance.isManager(inactiveManager);
-
-    //     assert.isTrue(manager3, 'Manager 1 should be active');
-    //     assert.isFalse(manager4, 'Manager 2 should be inactive');
-
-    //     const events3 = getEvents(tx3, 'ChangedManager');
-    //     const events4 = getEvents(tx4, 'ChangedManager');
-
-    //     assert.isTrue(events3[0].active, 'activeManager expected to be active');
-    //     assert.isFalse(events4[0].active, 'inactiveManager expected to be inactive');
-    // });
-
-    // it('should fail, because we try to set manager from unauthorized account', async () => {
-    //     try {
-    //         await votingInstance.setManager(activeManager, false, {from: activeInvestor1, gas: 1000000});
-    //         assert.fail('should have thrown before');
-    //     } catch (e) {
-    //         assertJump(e);
-    //     }
-    // });
-
-    // it('should whitelist investor accounts', async () => {
-    //     const tx1 = await votingInstance.whiteListInvestor(activeInvestor1, {from: owner, gas: 1000000});
-    //     const tx2 = await votingInstance.whiteListInvestor(activeInvestor2, {from: activeManager, gas: 1000000});
-
-    //     const whitelisted1 = await votingInstance.isWhitelisted(activeInvestor1);
-    //     const whitelisted2 = await votingInstance.isWhitelisted(activeInvestor2);
-
-    //     assert.isTrue(whitelisted1, 'Investor1 should be whitelisted');
-    //     assert.isTrue(whitelisted2, 'Investor2 should be whitelisted');
-
-    //     // Testing events
-    //     const events1 = getEvents(tx1, 'ChangedInvestorWhitelisting');
-    //     const events2 = getEvents(tx2, 'ChangedInvestorWhitelisting');
-
-    //     assert.equal(events1[0].investor, activeInvestor1, 'Investor1 address doesn\'t match');
-    //     assert.isTrue(events1[0].whitelisted, 'Investor1 should be whitelisted');
-
-    //     assert.equal(events2[0].investor, activeInvestor2, 'Investor2 address doesn\'t match');
-    //     assert.isTrue(events2[0].whitelisted, 'Investor2 should be whitelisted');
-    // });
-
-    // it('should unwhitelist investor account', async () => {
-    //     const tx            = await votingInstance.unWhiteListInvestor(inactiveInvestor1, {from: owner, gas: 1000000});
-    //     const whitelisted   = await votingInstance.isWhitelisted(inactiveInvestor1);
-
-    //     assert.isFalse(whitelisted, 'inactiveInvestor1 should be unwhitelisted');
-
-    //     // Testing events
-    //     const events = getEvents(tx, 'ChangedInvestorWhitelisting');
-
-    //     assert.equal(events[0].investor, inactiveInvestor1, 'inactiveInvestor1 address doesn\'t match');
-    //     assert.isFalse(events[0].whitelisted, 'inactiveInvestor1 should be unwhitelisted');
-    // });
-
-    // it('should fail, because we try to whitelist investor from unauthorized account', async () => {
-    //     try {
-    //         await votingInstance.whiteListInvestor(inactiveInvestor1, {from: activeInvestor2, gas: 1000000});
-    //         assert.fail('should have thrown before');
-    //     } catch (e) {
-    //         assertJump(e);
-    //     }
-    // });
-
-    // it('should fail, because we try to unwhitelist investor from unauthorized account', async () => {
-    //     try {
-    //         await votingInstance.whiteListInvestor(activeInvestor1, {from: activeInvestor2, gas: 1000000});
-    //         assert.fail('should have thrown before');
-    //     } catch (e) {
-    //         assertJump(e);
-    //     }
-    // });
-
-    // it('should fail, because we try to run batchWhiteListInvestors with a non manager account', async () => {
-    //     try {
-    //         await votingInstance.batchWhiteListInvestors([activeInvestor1, activeInvestor2], {from: activeInvestor2, gas: 1000000});
-    //         assert.fail('should have thrown before');
-    //     } catch (e) {
-    //         assertJump(e);
-    //     }
-    // });
-
-    // it('should fail, because we try to run unWhiteListInvestor with a non manager account', async () => {
-    //     try {
-    //         await votingInstance.unWhiteListInvestor(activeInvestor1, {from: activeInvestor2, gas: 1000000});
-    //         assert.fail('should have thrown before');
-    //     } catch (e) {
-    //         assertJump(e);
-    //     }
-    // });
-
-    // it('should whitelist 2 investors by batch function', async () => {
-    //     await votingInstance.unWhiteListInvestor(activeInvestor1, {from: owner, gas: 1000000});
-    //     await votingInstance.unWhiteListInvestor(activeInvestor2, {from: owner, gas: 1000000});
-
-    //     const tx = await votingInstance.batchWhiteListInvestors([activeInvestor1, activeInvestor2], {from: owner, gas: 1000000});
-
-    //     const whitelisted1  = await votingInstance.isWhitelisted(activeInvestor1);
-    //     const whitelisted2  = await votingInstance.isWhitelisted(activeInvestor2);
-
-    //     assert.isTrue(whitelisted1, 'activeInvestor1 should be whitelisted');
-    //     assert.isTrue(whitelisted2, 'activeInvestor2 should be whitelisted');
-
-    //     // Testing events
-    //     const events = getEvents(tx, 'ChangedInvestorWhitelisting');
-
-    //     assert.equal(events[0].investor, activeInvestor1, 'Investor1 address doesn\'t match');
-    //     assert.isTrue(events[0].whitelisted, 'Investor1 should be whitelisted');
-
-    //     assert.equal(events[1].investor, activeInvestor2, 'Investor2 address doesn\'t match');
-    //     assert.isTrue(events[1].whitelisted, 'Investor2 should be whitelisted');
-    // });
-
-    // it('should verify the investor account states succesfully', async () => {
-    //     const whitelisted1  = await votingInstance.isWhitelisted(activeInvestor1);
-    //     const whitelisted2  = await votingInstance.isWhitelisted(activeInvestor2);
-    //     const whitelisted3  = await votingInstance.isWhitelisted(inactiveInvestor1);
-
-    //     assert.isTrue(whitelisted1, 'activeInvestor1 should be whitelisted');
-    //     assert.isTrue(whitelisted2, 'activeInvestor2 should be whitelisted');
-    //     assert.isFalse(whitelisted3, 'inactiveInvestor1 should be unwhitelisted');
-    // });
-
-    // it('should fail, because we try to mint tokens for presale with a non owner account', async () => {
-    //     try {
-    //         await votingInstance.mintTokenPreSale(activeInvestor1, 1, {from: activeManager, gas: 1000000});
-
-    //         assert.fail('should have thrown before');
-    //     } catch (e) {
-    //         assertJump(e);
-    //     }
-    // });
-
-    // it('should fail, because we try to mint tokens more as cap limit allows', async () => {
-    //     try {
-    //         const big = new BigNumber(95000000 * 1e18);
-    //         await votingInstance.mintTokenPreSale(activeInvestor1, (cnf.cap + big.add(1)));
-
-    //         assert.fail('should have thrown before');
-    //     } catch (e) {
-    //         assertJump(e);
-    //     }
-    // });
-
-    // it('should fail, because we try to trigger buyTokens in before contribution time is started', async () => {
-    //     try {
-    //         await votingInstance.buyTokens(activeInvestor1, {from: activeInvestor2, gas: 1000000});
-
-    //         assert.fail('should have thrown before');
-    //     } catch (e) {
-    //         assertJump(e);
-    //     }
-    // });
-
-    // it('should fail, because we try to trigger the fallback function before contribution time is started', async () => {
-    //     try {
-    //         await votingInstance.sendTransaction({
-    //             from:   owner,
-    //             value:  web3.toWei(1, 'ether'),
-    //             gas:    700000
-    //         });
-
-    //         assert.fail('should have thrown before');
-    //     } catch (e) {
-    //         assertJump(e);
-    //     }
-    // });
-
-    // it('should mint tokens for presale', async () => {
-    //     const activeInvestor1Balance1   = await icoTokenInstance.balanceOf(activeInvestor1);
-    //     const activeInvestor2Balance1   = await icoTokenInstance.balanceOf(activeInvestor2);
-    //     const tenB                       = new BigNumber(10);
-    //     const fiveB                      = new BigNumber(5);
-
-    //     activeInvestor1Balance1.should.be.bignumber.equal(zero);
-    //     activeInvestor2Balance1.should.be.bignumber.equal(zero);
-
-    //     const tx1 = await votingInstance.mintTokenPreSale(activeInvestor1, 10);
-    //     const tx2 = await votingInstance.mintTokenPreSale(activeInvestor2, 5);
-
-    //     const activeInvestor1Balance2 = await icoTokenInstance.balanceOf(activeInvestor1);
-    //     const activeInvestor2Balance2 = await icoTokenInstance.balanceOf(activeInvestor2);
-
-    //     activeInvestor1Balance2.should.be.bignumber.equal(tenB);
-    //     activeInvestor2Balance2.should.be.bignumber.equal(fiveB);
-
-    //     // Testing events
-    //     const events1 = getEvents(tx1, 'TokenPurchase');
-    //     const events2 = getEvents(tx2, 'TokenPurchase');
-
-    //     assert.equal(events1[0].purchaser, owner, '');
-    //     assert.equal(events2[0].purchaser, owner, '');
-
-    //     assert.equal(events1[0].beneficiary, activeInvestor1, '');
-    //     assert.equal(events2[0].beneficiary, activeInvestor2, '');
-
-    //     events1[0].value.should.be.bignumber.equal(zero);
-    //     events1[0].amount.should.be.bignumber.equal(tenB);
-
-    //     events2[0].value.should.be.bignumber.equal(zero);
-    //     events2[0].amount.should.be.bignumber.equal(fiveB);
-    // });
-
-    // /**
-    //  * [ Contribution period ]
-    //  */
-    // it('should turn the time 35 days forward to contribution period', async () => {
-    //     console.log('[ Contribution period ]'.yellow);
-    //     await waitNDays(35);
-    // });
-
-    // it('should fail, because we try to trigger buyTokens as unwhitelisted investor', async () => {
-    //     try {
-    //         await votingInstance.buyTokens(activeInvestor1, {from: inactiveInvestor1, gas: 1000000, value: web3.toWei(2, 'ether')});
-
-    //         assert.fail('should have thrown before');
-    //     } catch (e) {
-    //         assertJump(e);
-    //     }
-    // });
-
-    // it('should fail, because we try to trigger buyTokens with a too low investment', async () => {
-    //     try {
-    //         await votingInstance.buyTokens(
-    //             activeInvestor1,
-    //             {from: activeInvestor1, gas: 1000000, value: web3.toWei(1, 'ether')}
-    //         );
-
-    //         assert.fail('should have thrown before');
-    //     } catch (e) {
-    //         assertJump(e);
-    //     }
-    // });
-
-    // it('should fail, because we try to trigger buyTokens for beneficiary 0x0', async () => {
-    //     try {
-    //         await votingInstance.buyTokens(
-    //             '0x0',
-    //             {from: activeInvestor1, gas: 1000000, value: web3.toWei(1, 'ether')}
-    //         );
-
-    //         assert.fail('should have thrown before');
-    //     } catch (e) {
-    //         assertJump(e);
-    //     }
-    // });
 
     // it('should buyTokens properly', async () => {
     //     const tx    = await votingInstance.buyTokens(

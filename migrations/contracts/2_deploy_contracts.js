@@ -11,7 +11,7 @@ module.exports = async (deployer) => {
     //TODO: Config these values
     const startTime = moment(new Date('2019-12-12')).format('X');
     const endTime = moment(new Date('2020-12-12')).format('X');
-    const rate = 12;
+    const rate = 1;
     const owner= web3.eth.coinbase;
 
     let tokenAddress;
@@ -39,8 +39,16 @@ module.exports = async (deployer) => {
         })
         .then( (voting) => {
             voting.token.call().then(
-                function (res){
-                    console.log('token address: ', res);
+                function (res) { // eslint-disable-line
+                    console.log('voting.token address: ', res);
+                });
+            voting.wallet.call().then(
+                function (res){ // eslint-disable-line
+                    console.log('voting.wallet address: ', res);
+                });
+            voting.electionStrategy.call().then(
+                function (res){ // eslint-disable-line
+                    console.log('voting.electionStrategy address: ', res);
                 });
             return BudgetWallet.deployed();
         })
