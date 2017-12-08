@@ -41,6 +41,7 @@ contract('BudgetProposalVoting', (accounts) => {
     const beneficiary       = accounts[4];
     const votingPeriod = duration.weeks(2);
     const lockupPeriod = duration.days(20);
+    const budget1 = 123e+17;
 
     // Provide icoTokenInstance for every test case
     let voting;
@@ -113,7 +114,7 @@ contract('BudgetProposalVoting', (accounts) => {
     it('should be able to make a proposal', async () => {
 
         const tx1  = await voting.createProposal(
-            web3.toWei(123, 'ether'),
+            budget1,
             'buy Cryptokitten for me',
             'http://cryptokitten.io',
             '0x123',
@@ -123,7 +124,7 @@ contract('BudgetProposalVoting', (accounts) => {
         const events = getEvents(tx1, 'ProposalCreated');
         assert.equal(events[0].name, 'buy Cryptokitten for me', 'Event doesnt exist');
         const props = await voting.proposals(0);
-        assert.equal(props[Proposal.amount], 123e+18);
+        assert.equal(props[Proposal.amount], budget1);
         assert.equal(props[Proposal.name], 'buy Cryptokitten for me');
         assert.equal(props[Proposal.url], 'http://cryptokitten.io');
         assert.equal(props[Proposal.hashvalue], '0x1230000000000000000000000000000000000000000000000000000000000000');
@@ -168,23 +169,24 @@ contract('BudgetProposalVoting', (accounts) => {
 
         const events = getEvents(tx1, 'FundsReleased');
 
-        assert.equal(events[0].amount.toNumber(), 123e+18);
+        assert.equal(events[0].amount.toNumber(), budget1);
         assert.equal(events[0].beneficiary, beneficiary);
     });
 
-    it('should be able to let beneficiaries get', async () => {
-        const tx1 = await voting.releaseFunds(
-            { from: activeInvestor1, gas: 1000000 }
+    it('should be able to let beneficiaries get funds', async () => {
+        const money = Number(await wallet.payments(beneficiary));
+        assert.isAtLeast(Number(await web3.eth.getBalance(wallet.address)), money); //precondition to check requirements
+        const balanceBefore = Number(await web3.eth.getBalance(beneficiary));
+        const tx1 = await wallet.withdrawPayments(
+            { from: beneficiary, gas: 1000000 }
         );
-
-        const events = getEvents(tx1, 'FundsReleased');
-
-        assert.equal(events[0].amount.toNumber(), 123e+18);
-        assert.equal(events[0].beneficiary, beneficiary);
+        const balanceAfter = Number(await web3.eth.getBalance(beneficiary));
+        const gasUsed = Number(tx1.receipt.gasUsed) * 1e+11;
+        console.log(gasUsed);
+        const spend = balanceAfter - balanceBefore;
+        const difference = budget1 - spend - gasUsed;
+        assert.isTrue( Math.abs(difference) < 1e+6, `difference ${budget1} - ${spend} - ${gasUsed} is too big ${difference}`);
     });
-
-
-
     // it('should buyTokens properly', async () => {
     //     const tx    = await votingInstance.buyTokens(
     //         activeInvestor1,
