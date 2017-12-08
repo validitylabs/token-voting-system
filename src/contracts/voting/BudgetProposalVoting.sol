@@ -101,7 +101,7 @@ contract BudgetProposalVoting is Ownable {
         ProposalVoted(msg.sender, votes, isYes);
     }
 
-    event FundsReleased(address dest, uint amount);
+    event FundsReleased(address beneficiary, uint amount);
     //@dev: anyone can release the funds, only the beneficiary receives them
     function releaseFunds() public timedTransitions atStage(Stages.AcceptingPayoutClaims) {
         //require(currentProposal().blocktime + VOTING_PERIOD >= block.timestamp);

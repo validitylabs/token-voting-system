@@ -169,8 +169,20 @@ contract('BudgetProposalVoting', (accounts) => {
         const events = getEvents(tx1, 'FundsReleased');
 
         assert.equal(events[0].amount.toNumber(), 123e+18);
-        assert.equal(events[0].beneficiary, beneficiaryAccount);
+        assert.equal(events[0].beneficiary, beneficiary);
     });
+
+    it('should be able to let beneficiaries get', async () => {
+        const tx1 = await voting.releaseFunds(
+            { from: activeInvestor1, gas: 1000000 }
+        );
+
+        const events = getEvents(tx1, 'FundsReleased');
+
+        assert.equal(events[0].amount.toNumber(), 123e+18);
+        assert.equal(events[0].beneficiary, beneficiary);
+    });
+
 
 
     // it('should buyTokens properly', async () => {
