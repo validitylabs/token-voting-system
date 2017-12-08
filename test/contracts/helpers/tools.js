@@ -20,24 +20,6 @@ export {BigNumber};
 const cnf = require('../../../cnf.json');
 export {cnf};
 
-/**
- * Increase N days in testrpc
- *
- * @param {integer} days Number of days
- * @return {integer} Time
- */
-export async function waitNDays(days) {
-    const daysInSeconds = days * 24 * 60 * 60;
-
-    const time = await web3.currentProvider.send({
-        jsonrpc: '2.0',
-        method: 'evm_increaseTime',
-        params: [daysInSeconds],
-        id: 4447
-    });
-
-    return time.result;
-}
 
 /**
  * Defines a EmptyStackException
@@ -134,18 +116,18 @@ export const duration = {
         return val;
     },
     minutes: (val) => {
-        return val * this.seconds(60);
+        return val * duration.seconds(60);
     },
     hours: (val) => {
-        return val * this.minutes(60);
+        return val * duration.minutes(60);
     },
     days: (val) => {
-        return val * this.hours(24);
+        return val * duration.hours(24);
     },
     weeks: (val) => {
-        return val * this.days(7);
+        return val * duration.days(7);
     },
     years: (val) => {
-        return val * this.days(365);
+        return val * duration.days(365);
     }
 };

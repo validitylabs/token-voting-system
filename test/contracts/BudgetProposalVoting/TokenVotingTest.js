@@ -4,7 +4,7 @@
  * @author Validity Labs AG <info@validitylabs.org>
  */
 
-import {assertJump, waitNDays, getEvents, BigNumber, cnf, increaseTimeTo} from '../helpers/tools';
+import {assertJump, getEvents, BigNumber, cnf, increaseTimeTo, increaseTime, duration} from '../helpers/tools';
 
 const BudgetProposalVoting = artifacts.require('./BudgetProposalVoting');
 const LoggedToken          = artifacts.require('./LoggedToken');
@@ -13,9 +13,9 @@ const LoggedTokenCrowdsale = artifacts.require('./LoggedTokenCrowdsale');
 
 
 const should = require('chai') // eslint-disable-line
-    .use(require('chai-as-promised'))
-    .use(require('chai-bignumber')(BigNumber))
-    .should();
+.use(require('chai-as-promised'))
+.use(require('chai-bignumber')(BigNumber))
+.should();
 
 const zero      = new BigNumber(0);
 const two       = new BigNumber(web3.toWei(2, 'ether'));
@@ -39,6 +39,11 @@ contract('BudgetProposalVoting', (accounts) => {
     const activeInvestor2   = accounts[2];
     const activeInvestor3   = accounts[3];
     const beneficiary       = accounts[4];
+    const votingPeriod1 = duration.seconds(2);
+    const a1 = duration.minutes(1) ;
+    const a2 = duration.hours(1) ;
+    const a3 = duration.days(1);
+    const votingPeriod = duration.weeks(2);
 
     // Provide icoTokenInstance for every test case
     let voting;
@@ -150,6 +155,12 @@ contract('BudgetProposalVoting', (accounts) => {
         assert.equal(props[Proposal.countNoVotes].toNumber(), 20e+18);
         assert.equal(props[Proposal.countYesVotes].toNumber(), 30e+18);
 
+    });
+    it('should move to time after crowdsale', async () => {
+        const before= web3.eth.getBlock(web3.eth.blockNumber).timestamp;
+        await increaseTime(voting_period);
+        const now= web3.eth.getBlock(web3.eth.blockNumber).timestamp;
+        assert.isAtLeast(now, time+votingPeriod);
     });
 
     // it('should buyTokens properly', async () => {
