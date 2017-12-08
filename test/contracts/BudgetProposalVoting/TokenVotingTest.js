@@ -182,10 +182,15 @@ contract('BudgetProposalVoting', (accounts) => {
         );
         const balanceAfter = Number(await web3.eth.getBalance(beneficiary));
         const gasUsed = Number(tx1.receipt.gasUsed) * 1e+11;
-        console.log(gasUsed);
         const spend = balanceAfter - balanceBefore;
         const difference = budget1 - spend - gasUsed;
         assert.isTrue( Math.abs(difference) < 1e+6, `difference ${budget1} - ${spend} - ${gasUsed} is too big ${difference}`);
+    });
+
+    it('should AcceptingProposals again', async () => {
+        console.log('[ accepting proposals period ]'.yellow);
+        const stage  = await voting.stage();
+        assert.equal(stage, 0, 'stage not in AcceptingProposals');
     });
 
 });

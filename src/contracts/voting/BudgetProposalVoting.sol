@@ -30,7 +30,7 @@ contract BudgetProposalVoting is Ownable {
     enum Stages {
     AcceptingProposal,
     AcceptingVotes,
-    AcceptingPayoutClaims,
+    AcceptingPayoutRequests,
     LockUpPeriod
     }
 
@@ -52,7 +52,7 @@ contract BudgetProposalVoting is Ownable {
         if (stage == Stages.AcceptingVotes &&
         now > currentProposal().blocktime + VOTING_PERIOD)
         if (electionStrategy.isYes(currentProposal().countYesVotes, currentProposal().countNoVotes)){
-            stage = Stages.AcceptingPayoutClaims;
+            stage = Stages.AcceptingPayoutRequests;
         }else{
             stage = Stages.LockUpPeriod;
         }
@@ -103,10 +103,11 @@ contract BudgetProposalVoting is Ownable {
 
     event FundsReleased(address beneficiary, uint amount);
     //@dev: anyone can release the funds, only the beneficiary receives them
-    function releaseFunds() public timedTransitions atStage(Stages.AcceptingPayoutClaims) {
+    function releaseFunds() public timedTransitions atStage(Stages.AcceptingPayoutRequests) {
         //require(currentProposal().blocktime + VOTING_PERIOD >= block.timestamp);
         wallet.authorizePayment(currentProposal().beneficiaryAccount, currentProposal().amount);
         FundsReleased(currentProposal().beneficiaryAccount, currentProposal().amount);
+        stage= Stages.AcceptingProposal;
     }
 
     function currentProposal() internal view returns ( Proposal ){
