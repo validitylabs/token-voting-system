@@ -89,7 +89,7 @@ contract BudgetProposalVoting is Ownable {
     }
 
     event ProposalVoted(address voter, uint votes, bool isYes);
-    function vote(bool isYes) public timedTransitions  {
+    function vote(bool isYes) public timedTransitions  atStage(Stages.AcceptingVotes) {
         uint votes = token.balanceOfAt(msg.sender, currentProposal().blocktime);
         require(votes > 0);
         Proposal storage proposal = proposals[proposals.length - 1];
@@ -101,9 +101,12 @@ contract BudgetProposalVoting is Ownable {
         ProposalVoted(msg.sender, votes, isYes);
     }
 
-    function claimFunds() public timedTransitions atStage(Stages.AcceptingPayoutClaims) {
-        require(currentProposal().blocktime + VOTING_PERIOD >= block.timestamp);
+    event FundsReleased(address dest, uint amount);
+    //@dev: anyone can release the funds, only the beneficiary receives them
+    function releaseFunds() public timedTransitions atStage(Stages.AcceptingPayoutClaims) {
+        //require(currentProposal().blocktime + VOTING_PERIOD >= block.timestamp);
         wallet.authorizePayment(currentProposal().beneficiaryAccount, currentProposal().amount);
+        FundsReleased(currentProposal().beneficiaryAccount, currentProposal().amount);
     }
 
     function currentProposal() internal view returns ( Proposal ){

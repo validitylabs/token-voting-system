@@ -39,11 +39,8 @@ contract('BudgetProposalVoting', (accounts) => {
     const activeInvestor2   = accounts[2];
     const activeInvestor3   = accounts[3];
     const beneficiary       = accounts[4];
-    const votingPeriod1 = duration.seconds(2);
-    const a1 = duration.minutes(1) ;
-    const a2 = duration.hours(1) ;
-    const a3 = duration.days(1);
     const votingPeriod = duration.weeks(2);
+    const lockupPeriod = duration.days(20);
 
     // Provide icoTokenInstance for every test case
     let voting;
@@ -126,7 +123,7 @@ contract('BudgetProposalVoting', (accounts) => {
         const events = getEvents(tx1, 'ProposalCreated');
         assert.equal(events[0].name, 'buy Cryptokitten for me', 'Event doesnt exist');
         const props = await voting.proposals(0);
-        assert.equal(props[Proposal.amount], web3.toWei(123, 'ether'));
+        assert.equal(props[Proposal.amount], 123e+18);
         assert.equal(props[Proposal.name], 'buy Cryptokitten for me');
         assert.equal(props[Proposal.url], 'http://cryptokitten.io');
         assert.equal(props[Proposal.hashvalue], '0x1230000000000000000000000000000000000000000000000000000000000000');
@@ -156,12 +153,25 @@ contract('BudgetProposalVoting', (accounts) => {
         assert.equal(props[Proposal.countYesVotes].toNumber(), 30e+18);
 
     });
-    it('should move to time after crowdsale', async () => {
-        const before= web3.eth.getBlock(web3.eth.blockNumber).timestamp;
-        await increaseTime(voting_period);
-        const now= web3.eth.getBlock(web3.eth.blockNumber).timestamp;
-        assert.isAtLeast(now, time+votingPeriod);
+
+    it('should move to time after voting period', async () => {
+        const before= Number (web3.eth.getBlock(web3.eth.blockNumber).timestamp);
+        await increaseTimeTo(before + votingPeriod);
+        const now= Number(web3.eth.getBlock(web3.eth.blockNumber).timestamp);
+        assert.isAtLeast(now, before + votingPeriod);
     });
+
+    it('should be able to let beneficiaries claim their money', async () => {
+        const tx1 = await voting.releaseFunds(
+            { from: activeInvestor1, gas: 1000000 }
+        );
+
+        const events = getEvents(tx1, 'FundsReleased');
+
+        assert.equal(events[0].amount.toNumber(), 123e+18);
+        assert.equal(events[0].beneficiary, beneficiaryAccount);
+    });
+
 
     // it('should buyTokens properly', async () => {
     //     const tx    = await votingInstance.buyTokens(
