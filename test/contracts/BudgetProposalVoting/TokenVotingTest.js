@@ -43,7 +43,7 @@ contract('BudgetProposalVoting', (accounts) => {
     const lockupPeriod = duration.days(20);
     const budget1 = 123e+17;
 
-    // Provide icoTokenInstance for every test case
+    // Provide an instance for every test case
     let voting;
     let token;
     let wallet;
